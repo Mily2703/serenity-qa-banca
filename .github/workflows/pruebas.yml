@@ -1,0 +1,31 @@
+name: Pruebas automatizadas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * 1"   # lunes 7:00 a. m. hora de Lima
+
+jobs:
+  serenity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Ejecutar suite (web + REST + SOAP)
+        run: ./mvnw -B clean verify
+
+      - name: Publicar reporte de Serenity
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-serenity
+          path: target/site/serenity
